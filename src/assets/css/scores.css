@@ -1,0 +1,11 @@
+.wins {
+    color: #008000;
+    padding: 5px;
+}
+.losses {
+    color: #ff0000;
+    padding: 5px;
+}
+.container {
+    margin-top: 30px;
+}
