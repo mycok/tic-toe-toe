@@ -1,0 +1,9 @@
+.board {
+    display: inline-flex;
+    flex-wrap: wrap;
+    width: 400px;
+    justify-content: center;
+    justify-items: center;
+    border-radius: 15px;
+    background-color: #191919;
+}
