@@ -2,8 +2,8 @@ export default class Storage {
     constructor(
         storageName = 'gameBoard',
          initialValue = { 
-             player1: { wins: 0, losses: 0 },
-              player2: { wins: 0, losses: 0 } 
+             computer: { wins: 0, losses: 0 },
+              human: { wins: 0, losses: 0 } 
             }) {
         this.storageName = storageName;
 

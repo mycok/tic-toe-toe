@@ -2,6 +2,9 @@
     color: #008000;
     padding: 5px;
 }
+.human {
+    margin-left: 20px;
+}
 .losses {
     color: #ff0000;
     padding: 5px;
