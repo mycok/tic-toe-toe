@@ -3,8 +3,12 @@ import React, { Component, Fragment } from 'react';
 import Board from './Board';
 import ResetButton from './ResetButton';
 import ScoreBoard from './ScoreBoard';
-import Storage from '../Storage';
-import { winner, checkIfAllBoxesAreClicked } from '../utils';
+import Storage from '../utils/Storage';
+import { 
+    determineWinner,
+    checkIfAllBoxesAreClicked,
+    computeBestMove
+ } from '../utils';
 import popper from '../utils/popper';
 
 class Game extends Component {
@@ -13,7 +17,7 @@ class Game extends Component {
     state = {
         boxes: Array(9).fill(null),
         next: true,
-        prevScores: this.storage.get()
+        prevScores: this.storage.get(),
     };
 
     static getDerivedStateFromProps(state) {
@@ -30,25 +34,53 @@ class Game extends Component {
         const { boxes, next } = this.state;
         const boxesClone = boxes.slice();
         
-        // check if the board contains a winning combination and if so, stop the game
-        if (winner(boxesClone) || boxesClone[index]) {
+        if (determineWinner(boxesClone) || boxesClone[index]) {
             return;
         }
 
-        // check if all boxes on the board are clicked and if so, stop the user from making any more moves
         if (checkIfAllBoxesAreClicked(boxesClone)) {
             return;
         }
 
-        // mark boxes with either X or O on every button click
-        boxesClone[index] = next ? 'X' : 'O';
+        boxesClone[index] = next && 'X';
+
+        this.setState({
+            boxes: boxesClone,
+            next: !next,
+        }, () => {
+            setTimeout(() => {
+                this.makeAIMove();
+            }, 500);
+        });
+    }
+
+    handleComputerMove = (index) => {
+        const { boxes, next } = this.state;
+        const boxesClone = boxes.slice();
+        
+        if (determineWinner(boxesClone) || boxesClone[index]) {
+            return;
+        }
+
+        if (checkIfAllBoxesAreClicked(boxesClone)) {
+            return;
+        }
+
+        boxesClone[index] = !next && 'O';
 
         this.setState({
             boxes: boxesClone,
             next: !next,
         });
     }
-    // called whenever the game stops. win, tie or loss to reset the board
+
+    makeAIMove = () => {
+        const { boxes } = this.state;
+        const bestMove = computeBestMove(boxes, 'X');
+
+        this.handleComputerMove(bestMove);
+    }
+
     handleBoardReset = () => {
         this.setState({
             boxes: Array(9).fill(null),
@@ -56,9 +88,8 @@ class Game extends Component {
         });
     }
 
-    render() {
-        const { boxes, next, prevScores } = this.state;
-        const currentWinner = winner(boxes);
+    handleGameState = (boxes, prevScores, next) => {
+        const currentWinner = determineWinner(boxes);
         const filledBoxes = checkIfAllBoxesAreClicked(boxes);
 
         let message;
@@ -66,18 +97,18 @@ class Game extends Component {
         if (currentWinner) {
             if (currentWinner === 'X') {
                 this.storage.update({
-                    player1: { wins: prevScores.player1.wins + 1, losses: prevScores.player1.losses  },
-                    player2: { wins: prevScores.player2.wins, losses: prevScores.player2.losses + 1 }
+                    human: { wins: prevScores.human.wins + 1, losses: prevScores.human.losses  },
+                    computer: { wins: prevScores.computer.wins, losses: prevScores.computer.losses + 1 }
                 });
 
             } else {
                 this.storage.update({
-                    player1: { wins: prevScores.player1.wins, losses: prevScores.player1.losses + 1 },
-                    player2: { wins: prevScores.player2.wins + 1, losses: prevScores.player2.losses }
+                    human: { wins: prevScores.human.wins, losses: prevScores.human.losses + 1 },
+                    computer: { wins: prevScores.computer.wins + 1, losses: prevScores.computer.losses }
                 });
             }
 
-            message = `${currentWinner === 'X' ? 'Player 1' : 'Player 2'} Wins`;
+            message = `${currentWinner === 'X' ? 'Human Player ' : 'Computer '} Wins`;
             popper(message, 'success', this.handleBoardReset);
 
         } else if (!currentWinner && filledBoxes) {
@@ -85,14 +116,21 @@ class Game extends Component {
             popper(message, 'info', this.handleBoardReset);
 
         } else {
-            message = `${next ? 'Player 1' : 'Player 2'}'s turn`;
+            message = `${next ? 'Human Player' : 'Computer'}'s turn`;
         }
+
+        return message;
+    }
+
+    render() {
+        const { boxes, next, prevScores } = this.state;
+        const gameStateMessage = this.handleGameState(boxes, prevScores, next);
 
         return (
             <Fragment>
                 <h3>Tic-Tac-Toe</h3>
                 <div className="container">
-                    <h3 className="wins">{message}</h3>
+                    <h3 className="wins">{gameStateMessage}</h3>
                     <Board boxes={boxes} handleBoxClick={this.handleBoxClick} /> 
                 </div>
                 <ScoreBoard scores={prevScores} />

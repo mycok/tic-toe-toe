@@ -2,32 +2,32 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const ScoreBoard = ({ scores }) => {
-  const { player1, player2 } = scores;
+  const { computer, human } = scores;
 
   return (
     <div className="container">
       <div>
-        <span>Player 1: </span>
+        <span>Computer: </span>
         {' '}
         <span className="wins">Wins</span>
         {' '}
-        <strong id="o_win">{player1.wins}</strong>
+        <strong id="o_win">{computer.wins}</strong>
         {' '}
         <span className="losses">Losses</span>
         {' '}
-        <strong id="o_win">{player1.losses}</strong>
+        <strong id="o_win">{computer.losses}</strong>
       </div>
 
       <div>
-        <span>Player 2: </span>
+        <span>Human: </span>
         {' '}
-        <span className="wins">Wins</span>
+        <span className="wins human">Wins</span>
         {' '}
-        <strong id="x_win">{player2.wins}</strong>
+        <strong id="x_win">{human.wins}</strong>
         {' '}
         <span className="losses">Losses</span>
         {' '}
-        <strong id="x_win">{player2.losses}</strong>
+        <strong id="x_win">{human.losses}</strong>
       </div>
     </div>
   )
